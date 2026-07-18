@@ -9,16 +9,20 @@
     {section:'Tổng quan'},
     {key:'dashboard', label:'Dashboard', icon:'bi-speedometer2', href:adminRoute('dashboard')},
     {section:'Bán hàng'},
-    {key:'products', label:'Sản phẩm', icon:'bi-laptop', href:'products.html'},
+    {key:'orders', label:'Đơn hàng', icon:'bi-receipt', href:adminRoute('orders')},
+    {key:'reviews', label:'Đánh giá khách hàng', icon:'bi-star', href:adminRoute('reviews')},
+    {key:'products', label:'Sản phẩm', icon:'bi-laptop', href:adminRoute('products')},
     {key:'categories', label:'Danh mục', icon:'bi-tags', href:adminRoute('category')},
     {key:'brands', label:'Thương hiệu', icon:'bi-award', href:adminRoute('brands')},
-    {key:'specs', label:'Thông số kỹ thuật', icon:'bi-sliders', href:'specifications.html'},
-    {key:'inventory', label:'Tồn kho', icon:'bi-box-seam', href:'inventory.html'},
+    {key:'specs', label:'Thông số kỹ thuật', icon:'bi-sliders', href:adminRoute('specs')},
+    {key:'inventory', label:'Tồn kho', icon:'bi-box-seam', href:adminRoute('inventory')},
+    {key:'imports', label:'Nhập hàng', icon:'bi-box-arrow-in-down', href:adminRoute('imports')},
+    {key:'exports', label:'Xuất hàng', icon:'bi-box-arrow-up', href:adminRoute('exports')},
     {section:'Khuyến mãi & Vận chuyển'},
-    {key:'coupons', label:'Mã giảm giá', icon:'bi-ticket-perforated', href:'coupons.html'},
-    {key:'shipping', label:'Phí vận chuyển', icon:'bi-truck', href:'shipping.html'},
+    {key:'coupons', label:'Mã giảm giá', icon:'bi-ticket-perforated', href:adminRoute('coupons')},
+    {key:'shipping', label:'Phí vận chuyển', icon:'bi-truck', href:adminRoute('shipping')},
     {section:'Hệ thống'},
-    {key:'users', label:'Người dùng', icon:'bi-people', href:'users.html'}
+    {key:'users', label:'Khách hàng', icon:'bi-people', href:adminRoute('users')}
   ];
 
   function renderLayout(opts){
@@ -52,8 +56,7 @@
       <button class="toggle-sidebar" id="toggleSidebar"><i class="bi bi-list"></i></button>
       <h1 class="page-title">${pageTitle}</h1>
       <div class="topbar-actions">
-        <button class="icon-btn" title="Thông báo"><i class="bi bi-bell"></i><span class="dot"></span></button>
-        <button class="icon-btn" title="Xem website" onclick="window.open('../computer-shop/index.html','_blank')"><i class="bi bi-globe"></i></button>
+        <button class="icon-btn" title="Xem website" onclick="window.open('/','_blank')"><i class="bi bi-globe"></i></button>
         <div class="user-chip" id="userChip">
           <div class="avatar">AD</div>
           <div>
@@ -89,17 +92,9 @@
     document.getElementById('toggleSidebar').addEventListener('click',()=>{
       sidebar.classList.toggle('open');
     });
-    document.getElementById('resetSeedBtn').addEventListener('click',(e)=>{
-      e.preventDefault();
-      if(confirm('Reset toàn bộ dữ liệu về mẫu ban đầu?')){
-        DB.resetAll();
-        location.reload();
-      }
-    });
     document.getElementById('userChip').addEventListener('click',()=>{
       if(confirm('Đăng xuất khỏi admin?')){
-        // user will wire up to real login. Default redirect:
-        location.href = '../login.html';
+        location.href = '/logout';
       }
     });
   }

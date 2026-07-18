@@ -37,7 +37,6 @@ class CategoryController extends Controller
         ]);
 
         $now = now();
-
         $id = DB::table('categorise')->insertGetId([
             'name' => $validated['name'],
             'parent_id' => $validated['parent_id'] ?? null,

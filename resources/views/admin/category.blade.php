@@ -135,7 +135,7 @@ function openForm(id){
         </select>
       </div>
       <div class="form-group" style="display:flex;align-items:flex-end">
-        <label class="switch category-status-switch">
+        <label class="switch status-switch">
           <input type="checkbox" name="active" ${active ? 'checked' : ''}>
           <span class="track"></span>
           <span class="switch-label">Kích hoạt</span>

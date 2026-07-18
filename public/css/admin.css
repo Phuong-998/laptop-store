@@ -268,14 +268,14 @@ select.form-control{appearance:none;background-image:url("data:image/svg+xml;utf
 }
 .switch input:checked+.track{background:var(--brand)}
 .switch input:checked+.track::after{transform:translateX(16px)}
-.form-group label.category-status-switch{
+.form-group label.status-switch{
   display:inline-flex;
   align-items:center;
   gap:8px;
   margin:0;
 }
-.category-status-switch .track{flex:0 0 36px}
-.category-status-switch .switch-label{
+.status-switch .track{flex:0 0 36px}
+.status-switch .switch-label{
   line-height:20px;
   white-space:nowrap;
 }

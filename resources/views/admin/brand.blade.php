@@ -39,7 +39,11 @@
 </div>
 <div
   id="brandConfig"
-  data-brand="{{ json_encode($brand ?? []) }}"
+  data-brand="{{ base64_encode(json_encode($brand ?? [])) }}"
+  data-store-url="{{ route('admin.brand.store') }}"
+  data-update-brand-url = "{{ route('admin.brand.update',['id' => 'ID'])}}"
+  data-delete-brand-url = "{{ route('admin.brand.delete',['id' => 'ID'])}}"
+  data-csrf="{{ csrf_token() }}"
   hidden
 >
 </div>
@@ -47,9 +51,12 @@
 @push('scripts')
 <script>
 const brandConfig = document.getElementById('brandConfig');
-console.log(brandConfig);
-let brand = JSON.parse(brandConfig?.dataset.brand || 'W10=');
+let brand = JSON.parse(atob(brandConfig.dataset.brand || 'W10='));
+const brandStoreUrl = brandConfig.dataset.storeUrl;
+const brandUpdateUrl = brandConfig.dataset.updateBrandUrl;
+const brandDeleteUrl = brandConfig.dataset.deleteBrandUrl;
 const state = {q: '', status: ''};
+const csrfToken = brandConfig.dataset.csrf;
 function render(){
   const list = brand
     .filter(c => {
@@ -97,10 +104,105 @@ document.getElementById('statusFilter').addEventListener('change', e => {
   state.status = e.target.value;
   render();
 });
+document.getElementById('addBtn').addEventListener('click', () => openForm());
+window.onEdit = id => openForm(id);
+window.onRemove = id => {
+  const brands = brand.find(item => String(item.id) === String(id));
+  if (!brands) {
+    UI.toast('Không tìm thấy thương hiệu', 'danger');
+    return;
+  }
 
+  UI.confirmDialog(`Xóa thương <b>${UI.escapeHtml(brands.name)}</b>?`, () => {
+    fetch(brandDeleteUrl.replace('ID', encodeURIComponent(id)), {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+      }
+    })
+      .then(async response => {
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(result.message || 'Không thể xóa thương hiệu');
+        }
+        brand = brand.filter(item => String(item.id) !== String(id));
+        UI.toast(result.message || 'Đã xóa thương hiệu', 'success');
+        render();
+      })
+      .catch(error => UI.toast(error.message, 'danger'));
+  });
+}
 function openForm(id)
 {
-  
+  const c = id ? brand.find(item => String(item.id) === String(id)) : {active: true};
+  const active = c.status !== undefined ? Number(c.status) === 1 : Boolean(c.active);
+  const isEdit = !!id;
+  const body = `
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Tên thương hiệu<span class="req">*</span></label>
+        <input class="form-control" name="name" required value="${UI.escapeHtml(c.name || '')}">
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end">
+        <label class="switch status-switch">
+          <input type="checkbox" name="active" ${active ? 'checked' : ''}>
+          <span class="track"></span>
+          <span class="switch-label">Kích hoạt</span>
+        </label>
+      </div>
+    </div>
+  `;
+  const modal = UI.openModal({
+    title: isEdit ? 'Sửa thương hiệu' : 'Thêm thương hiệu',
+    body,
+    confirmText: isEdit ? 'Cập nhật' : 'Tạo mới',
+     onConfirm: overlay => {
+      const f = overlay.querySelector('.modal-body');
+      const get = n => f.querySelector(`[name="${n}"]`).value.trim();
+      const name = get('name');
+      if (!name) {
+        UI.toast('Tên danh mục không được trống', 'danger');
+        return false;
+      };
+      const data = {
+        'name' : name,
+         active: f.querySelector('[name="active"]').checked
+      };
+      const requestUrl = isEdit
+        ? brandUpdateUrl.replace('ID', encodeURIComponent(id))
+        : brandStoreUrl;
+       fetch(requestUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify(data)
+      })
+        .then(async response => {
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            const message = result.message || Object.values(result.errors || {}).flat()[0] || 'Không thể lưu thương hiệu';
+            throw new Error(message);
+          }
+          if (isEdit) {
+            brand = brand.map(item => String(item.id) === String(id) ? result.brand : item);
+          } else {
+            brand.unshift(result.brand);
+          }
+          UI.toast(result.message || (isEdit ? 'Đã cập nhật thương hiêu' : 'Đã thêm thương hiệu'), 'success');
+          render();
+          modal.close();
+        })
+        .catch(error => UI.toast(error.message, 'danger'));
+
+      return false;
+    }
+   
+        
+  })
 }
 </script>
 @endpush
